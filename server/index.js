@@ -46,7 +46,7 @@ const port = 5000;
 
 
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect("mongodb+srv://catci142:catci142@cluster0.oyfmupl.mongodb.net/2ndass?retryWrites=true&w=majority&appName=Cluster0/")
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection failed:", err));
 
