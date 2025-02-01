@@ -22,7 +22,6 @@ app.use(cors({
 }));
 
 
-const MongoStore = require("connect-mongo");
 
 app.use(
   session({
