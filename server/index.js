@@ -17,19 +17,19 @@ app.use(cors({
   origin: "http://localhost:3000",
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
-  credentials: true, // Allow cookies for session handling
+  credentials: true, 
 }));
 
-// Session middleware configuration
+
 app.use(
     session({
-      secret: "your-secret-key",  // Secret key for signing the session ID cookie
+      secret: "your-secret-key",  
       resave: false,
       saveUninitialized: true,
       cookie: {
-        secure: false,  // `secure: false` should be used in development (when not using HTTPS)
-        httpOnly: true, // Helps prevent client-side JS from accessing the cookie
-        maxAge: 1000 * 60 * 60 * 24 // 1 day (optional, based on your session needs)
+        secure: false,  
+        httpOnly: true, 
+        maxAge: 1000 * 60 * 60 * 24 
       },
     })
   );
@@ -38,13 +38,13 @@ const io = socketio(server, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
-    credentials: true, // Allow cookies for session handling
+    credentials: true, 
   }
 });
 
 const port = 5000;
 
-// MongoDB connection
+
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
@@ -53,14 +53,14 @@ mongoose
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "client/build")));
 
-// Authentication endpoints
+
 app.post("/login", async (req, res) => {
     try {
       const { email, password } = req.body;
       const user = await User.findOne({ email });
       if (user && password === user.password) {
-        req.session.userId = user._id;  // Store the user ID in the session
-        console.log("User ID set in session:", req.session.userId);  // Log for debugging
+        req.session.userId = user._id;  
+        console.log("User ID set in session:", req.session.userId); 
         res.json({ success: true });
       } else {
         res.status(400).json({ error: "Invalid credentials" });
@@ -86,10 +86,10 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// Get logged-in user's name
+
 app.get("/get-user-name", async (req, res) => {
   try {
-    const userId = req.session.userId;  // Retrieve userId from session
+    const userId = req.session.userId; 
     console.log("this"+userId);
     if (!userId) {
       return res.status(401).json({ error: "User not authenticated" });
@@ -106,7 +106,6 @@ app.get("/get-user-name", async (req, res) => {
   }
 });
 
-// Room creation endpoint
 app.post("/create-room", async (req, res) => {
   try {
     const { roomId, roomName } = req.body;
@@ -116,14 +115,14 @@ app.post("/create-room", async (req, res) => {
     }
     const newRoom = new Room({ roomId, roomName, users: 0 });
     await newRoom.save();
-    io.emit("room list", await Room.find());  // Emit updated room list to all clients
+    io.emit("room list", await Room.find());  
     res.json({ success: true, room: newRoom });
   } catch (error) {
     res.status(500).json({ error: "Error creating room" });
   }
 });
 
-// Get all rooms
+
 app.get("/rooms", async (req, res) => {
   try {
     const rooms = await Room.find();
@@ -133,22 +132,22 @@ app.get("/rooms", async (req, res) => {
   }
 });
 
-// Endpoint to fetch room-specific messages
+
 app.get("/messages/:roomId", async (req, res) => {
   try {
     const { roomId } = req.params;
-    const messages = await Message.find({ roomId }).sort({ timestamp: -1 }).limit(100); // Limit to the latest 100 messages
+    const messages = await Message.find({ roomId }).sort({ timestamp: -1 }).limit(100); 
     res.json(messages);
   } catch (error) {
     res.status(500).json({ error: "Error fetching messages" });
   }
 });
 
-// WebSocket server handling
+
 io.on("connection", (socket) => {
     console.log("New user connected");
   
-    // Handle joining a room
+   
     socket.on("join room", async ({ roomId, name }) => {
       try {
         const room = await Room.findOne({ roomId });
@@ -157,34 +156,34 @@ io.on("connection", (socket) => {
           return;
         }
   
-        // Increment user count for the room
+     
         room.users++;
         await room.save();
   
-        // Join the room and set socket's roomId and name
+      
         socket.join(roomId);
         socket.roomId = roomId;
         socket.name = name;
   
-        // Get the last 100 messages from the room
-        const history = await Message.find({ roomId }).sort({ timestamp: 1 }).limit(100); // Oldest first
+        
+        const history = await Message.find({ roomId }).sort({ timestamp: 1 }).limit(100); 
         socket.emit("chat history", history);
   
-        // Emit room joined event to the client
+        
         socket.emit("room joined");
   
-        // Fetch and emit updated user list in the room
+        
         const usersInRoom = (await io.in(roomId).fetchSockets()).map(s => s.name || "Anonymous");
         io.to(roomId).emit("user list", usersInRoom);
   
-        // Notify others in the room that a new user has joined
+        
         io.to(roomId).emit("user joined", { name, users: room.users });
       } catch (error) {
         console.error("Error joining room:", error);
       }
     });
   
-    // Handle sending a chat message
+    
     socket.on("chat message", async ({ roomId, msg }) => {
       try {
         const name = socket.name || "Anonymous";
@@ -193,29 +192,29 @@ io.on("connection", (socket) => {
           return;
         }
   
-        // Create and save the new message in the database
+        
         const message = new Message({ roomId, name, msg });
         await message.save();
   
-        // Emit the new message to the room
+       
         io.to(roomId).emit("chat message", { name, msg, timestamp: message.timestamp });
       } catch (error) {
         console.error("Error saving message:", error);
       }
     });
 
-    // Handle user typing
+    
 socket.on("typing", (roomId, name) => {
     socket.to(roomId).emit("user typing", name);
   });
   
-  // Handle stop typing
+  
   socket.on("stop typing", (roomId) => {
     socket.to(roomId).emit("user stopped typing");
   });
   
   
-    // Handle leaving a room
+    
     socket.on("leave room", async () => {
       try {
         const roomId = socket.roomId;
@@ -223,20 +222,15 @@ socket.on("typing", (roomId, name) => {
   
         const room = await Room.findOne({ roomId });
         if (room) {
-          room.users = Math.max(0, room.users - 1); // Ensure the user count doesn't go negative
+          room.users = Math.max(0, room.users - 1); 
           await room.save();
   
           socket.leave(roomId);
           
-          // Emit room updates after a user leaves
+        
           io.to(roomId).emit("user left", { name: socket.name, users: room.users });
   
-          // If there are no users left, you can choose to delete the room (optional)
-        //   if (room.users === 0) {
-        //     await Room.deleteOne({ roomId });
-        //   }
-  
-          // Emit updated room list to all clients
+       
           io.emit("room list", await Room.find());
         }
       } catch (error) {
@@ -244,25 +238,20 @@ socket.on("typing", (roomId, name) => {
       }
     });
   
-    // Handle user disconnect
+   
     socket.on("disconnect", async () => {
       const roomId = socket.roomId;
       if (roomId) {
         try {
           const room = await Room.findOne({ roomId });
           if (room) {
-            room.users = Math.max(0, room.users - 1); // Decrement user count
+            room.users = Math.max(0, room.users - 1);
             await room.save();
   
-            // Emit user left message to the room
+          
             io.to(roomId).emit("user left", { name: socket.name, users: room.users });
   
-            // Optionally, delete the room if no users remain
-            // if (room.users === 0) {
-            //   await Room.deleteOne({ roomId });
-            // }
-  
-            // Emit updated room list to all clients
+          
             io.emit("room list", await Room.find());
           }
         } catch (error) {
