@@ -21,19 +21,25 @@ app.use(cors({
 }));
 
 
+const MongoStore = require("connect-mongo");
+
 app.use(
-    session({
-      secret: "your-secret-key",  
-      resave: false,
-      saveUninitialized: true,
-      cookie: {
-        secure: false,  
-        httpOnly: true, 
-        maxAge: 1000 * 60 * 60 * 24 
-      },
-    })
-  );
-  
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: "mongodb+srv://catci142:catci142@cluster0.oyfmupl.mongodb.net/2ndass?retryWrites=true&w=majority&appName=Cluster0/",
+      collectionName: "sessions",
+    }),
+    cookie: {
+      secure: false, // Set to true if using HTTPS
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  })
+);
+
 const io = socketio(server, {
   cors: {
     origin: "http://localhost:3000",
