@@ -20,6 +20,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type"],
   credentials: true, 
 }));
+app.set("trust proxy", 1);
+
 
 
 
