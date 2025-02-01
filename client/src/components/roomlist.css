@@ -1,0 +1,204 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  body {
+    background-color: #f3f4f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  /* Main Room List Container */
+  .room-list {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    overflow-y: auto;
+    max-height: 80vh;
+    position: relative;
+  }
+  
+  /* Header */
+  .room-list h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* Room List */
+  .room-list ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  
+  .room-list li {
+    background-color: #fafafa;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    position: relative;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .room-list li:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-5px);
+  }
+  
+  .room-list li button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 100%;
+    margin-top: 15px;
+  }
+  
+  .room-list li button:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+  }
+  
+  .room-list li button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+  
+  /* Room ID Input Field */
+  .room-list .room-id-input-visible {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .room-list .room-id-input-visible input {
+    padding: 14px 18px;
+    width: 100%;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    font-size: 1.1rem;
+    color: #555;
+    transition: border-color 0.3s ease;
+  }
+  
+  .room-list .room-id-input-visible input:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+  
+  .room-list .room-id-input-visible button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .room-list .room-id-input-visible button:hover {
+    background-color: #27ae60;
+  }
+  
+  .room-list li .cancel-btn {
+    background-color: #f39c12;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .room-list li .cancel-btn:hover {
+    background-color: #e67e22;
+  }
+  
+  /* Create Room Section */
+  .create-room {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+    margin-top: 40px;
+  }
+  
+  .create-room h3 {
+    font-size: 1.8rem;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .create-room input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 20px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    color: #555;
+    transition: border-color 0.3s ease;
+  }
+  
+  .create-room input:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+  
+  .create-room button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .create-room button:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Add a small gap between the input fields */
+  .create-room input + input {
+    margin-top: 10px;
+  }
+  
+  .create-room button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+  
