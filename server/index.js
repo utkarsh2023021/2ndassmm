@@ -8,6 +8,7 @@ const session = require("express-session");
 const User = require("./model/user");
 const Room = require("./model/room");
 const Message = require("./model/message");
+require("dotenv").config(); 
 
 const app = express();
 const server = http.createServer(app);
@@ -45,7 +46,7 @@ const port = 5000;
 
 // MongoDB connection
 mongoose
-  .connect("mongodb+srv://catci142:catci142@cluster0.oyfmupl.mongodb.net/2ndass?retryWrites=true&w=majority&appName=Cluster0/")
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection failed:", err));
 
