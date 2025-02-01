@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "cors": "^2.8.5",
+     "connect-mongo": "^5.1.0",
     "cra-template": "1.2.0",
     "express-session": "^1.18.1",
     "io": "^1.5.3",
