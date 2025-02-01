@@ -54,6 +54,24 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "client/build")));
 
 
+app.get("/db-status", async (req, res) => {
+  try {
+    const status = mongoose.connection.readyState;
+    const statusMessage = {
+      0: "Disconnected",
+      1: "Connected",
+      2: "Connecting",
+      3: "Disconnecting"
+    }[status] || "Unknown";
+
+    res.json({ status: statusMessage });
+  } catch (error) {
+    res.status(500).json({ error: "Error checking database status" });
+  }
+});
+
+
+
 app.post("/login", async (req, res) => {
     try {
       const { email, password } = req.body;
