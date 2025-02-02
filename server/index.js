@@ -27,7 +27,7 @@ app.use(
       resave: false,
       saveUninitialized: true,
       cookie: {
-        secure: false,  // `secure: false` should be used in development (when not using HTTPS)
+        secure: true,  // `secure: false` should be used in development (when not using HTTPS)
         httpOnly: true, // Helps prevent client-side JS from accessing the cookie
         maxAge: 1000 * 60 * 60 * 24 // 1 day (optional, based on your session needs)
       },
