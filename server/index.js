@@ -32,7 +32,7 @@ app.use(
       collectionName: "sessions",
     }),
       cookie: {
-        secure: true,  // `secure: false` should be used in development (when not using HTTPS)
+         // `secure: false` should be used in development (when not using HTTPS)
         httpOnly: true, // Helps prevent client-side JS from accessing the cookie
         maxAge: 1000 * 60 * 60 * 24 // 1 day (optional, based on your session needs)
       },
