@@ -75,6 +75,7 @@ app.post("/login", async (req, res) => {
                 }
 
                 console.log("User ID set in session:", req.session.userId);
+               console.log("Session data after setting userId:", req.session); 
                 res.json({ success: true });
             });
 
