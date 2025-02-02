@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const cors = require("cors");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const User = require("./model/user");
 const Room = require("./model/room");
 const Message = require("./model/message");
@@ -25,7 +26,11 @@ app.use(
     session({
       secret: "your-secret-key",  // Secret key for signing the session ID cookie
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
+        store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI, // Use the env variable
+      collectionName: "sessions",
+    }),
       cookie: {
         secure: true,  // `secure: false` should be used in development (when not using HTTPS)
         httpOnly: true, // Helps prevent client-side JS from accessing the cookie
