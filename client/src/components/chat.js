@@ -3,85 +3,93 @@ import { useParams, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import "./chat.css";
 
-const socket = io("http://localhost:5000");
-
 const Chat = () => {
   const { roomId } = useParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [userName, setUserName] = useState(""); // Store the logged-in user's name
+  const [userName, setUserName] = useState("");
   const [joined, setJoined] = useState(false);
-  const [users, setUsers] = useState([]); // Store list of online users
-  const [showUsers, setShowUsers] = useState(false); // Toggle for user list popup
-  const [typingUser, setTypingUser] = useState(""); // Track who's typing
-  const messageEndRef = useRef(null); // Reference to the end of the message list
-  const typingTimeoutRef = useRef(null); // Reference for the typing timeout
+  const [users, setUsers] = useState([]);
+  const [showUsers, setShowUsers] = useState(false);
+  const [typingUser, setTypingUser] = useState("");
+  const messageEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
   const navigate = useNavigate();
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/get-user-name", {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    const storedEmail = localStorage.getItem("userEmail");
+    if (!storedEmail) {
+      navigate("/login");
+      return;
+    }
+
+    fetch(`http://localhost:5000/get-user-name/${storedEmail}`)
       .then((response) => response.json())
-      .then((data) => setUserName(data.name))
-      .catch((error) => {
-        console.error("Error fetching user name:", error);
-        navigate("/login");
-      });
+      .then((data) => {
+        if (data.name) {
+          setUserName(data.name);
+        } else {
+          navigate("/login");
+        }
+      })
+      .catch(() => navigate("/login"));
+  }, [navigate]);
 
-    if (!roomId || !userName) return;
+  useEffect(() => {
+    socketRef.current = io("http://localhost:5000/");
 
-    setLoading(true);
-    socket.emit("join room", { roomId, name: userName });
-
-    socket.on("chat history", (history) => {
-      setMessages(history); // Directly set the history from the backend
+    socketRef.current.on("chat history", (history) => {
+      setMessages(history);
       setLoading(false);
     });
 
-    socket.on("chat message", (msg) => {
-      setMessages((prevMessages) => [...prevMessages, msg]); // Append new message to the list
+    socketRef.current.on("chat message", (msg) => {
+      setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
-    socket.on("user list", (userList) => {
-      setUsers(userList);
+    socketRef.current.on("user list", (userList) => {
+      setUsers(userList || []);
     });
 
-    socket.on("user typing", (name) => {
-      setTypingUser(name); // Show who is typing
-    });
-
-    socket.on("user stopped typing", () => {
-      setTypingUser(""); // Clear typing user status
-    });
-
-    socket.on("error", (error) => {
+    socketRef.current.on("user typing", (name) => setTypingUser(name));
+    socketRef.current.on("user stopped typing", () => setTypingUser(""));
+    socketRef.current.on("error", (error) => {
       alert(error.message);
       setJoined(false);
     });
 
     return () => {
-      socket.emit("leave room", { roomId });
-      socket.off("chat history");
-      socket.off("chat message");
-      socket.off("user list");
-      socket.off("user typing");
-      socket.off("user stopped typing");
-      socket.off("error");
+      socketRef.current.disconnect();
     };
-  }, [roomId, userName]);
+  }, []);
 
-  // Scroll to the bottom whenever the messages change
+  useEffect(() => {
+    if (roomId && joined) {
+      socketRef.current.emit("join room", { roomId, name: userName });
+
+      fetch(`http://localhost:5000/rooms/${roomId}/users`)
+        .then((response) => response.json())
+        .then((data) => setUsers(data.users || []))
+        .catch(() => setUsers([]));
+    }
+  }, [roomId, joined]);
+
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  const handleJoinRoom = () => {
+    if (userName.trim()) {
+      setJoined(true);
+      socketRef.current.emit("join room", { roomId, name: userName });
+    } else {
+      alert("Please enter a valid name to join the room.");
+    }
+  };
 
   const handleSendMessage = () => {
     if (!joined) {
@@ -90,36 +98,32 @@ const Chat = () => {
     }
 
     if (newMessage.trim()) {
-      socket.emit("chat message", { roomId, msg: newMessage });
-      setNewMessage(""); // Clear input after sending
-      socket.emit("stop typing", roomId); // Emit stop typing when message is sent
-    }
-  };
-
-  const handleJoinRoom = () => {
-    if (userName.trim()) {
-      setJoined(true);
-    } else {
-      alert("Please enter a valid name to join the room.");
+      socketRef.current.emit("chat message", { roomId, msg: newMessage });
+      setNewMessage("");
+      socketRef.current.emit("stop typing", roomId);
     }
   };
 
   const handleTyping = () => {
     if (newMessage.trim()) {
-      socket.emit("typing", roomId, userName); // Emit typing when user is typing
-
-      // Clear the previous timeout
+      socketRef.current.emit("typing", roomId, userName);
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-
-      // Set a new timeout to emit stop typing after 1 second of inactivity
       typingTimeoutRef.current = setTimeout(() => {
-        socket.emit("stop typing", roomId); // Emit stop typing after delay
+        socketRef.current.emit("stop typing", roomId);
       }, 1000);
     } else {
-      socket.emit("stop typing", roomId); // Emit stop typing if no text
+      socketRef.current.emit("stop typing", roomId);
     }
+  };
+
+  const handleLeaveRoom = () => {
+    if (!joined) return;
+
+    socketRef.current.emit("leave room");
+    setJoined(false);
+    setUsers([]); // Clear the user list when leaving the room
   };
 
   return (
@@ -152,7 +156,6 @@ const Chat = () => {
             </div>
           )}
 
-          {/* Display typing status */}
           {typingUser && typingUser !== userName && (
             <div className="typing-status">{typingUser} is typing...</div>
           )}
@@ -163,7 +166,7 @@ const Chat = () => {
               value={newMessage}
               onChange={(e) => {
                 setNewMessage(e.target.value);
-                handleTyping(); // Emit typing status when the user types
+                handleTyping();
               }}
               placeholder="Type a message"
             />
@@ -172,17 +175,15 @@ const Chat = () => {
             </button>
           </div>
 
-          {/* Floating User Count Button */}
           <div className="user-count" onClick={() => setShowUsers(!showUsers)}>
-            🟢 {users.length}
+            🟢 {users?.length || 0}
           </div>
 
-          {/* User List Popup */}
           {showUsers && (
             <div className="user-list">
               <h3>Online Users</h3>
               <ul>
-                {users.length > 0 ? (
+                {users?.length > 0 ? (
                   users.map((user, index) => <li key={index}>{user}</li>)
                 ) : (
                   <li>No users online</li>
@@ -194,7 +195,12 @@ const Chat = () => {
             </div>
           )}
 
-          {/* Scroll to the bottom of the chat */}
+          {joined && (
+            <div className="leave-room">
+              <button onClick={handleLeaveRoom}>Leave Room</button>
+            </div>
+          )}
+
           <div ref={messageEndRef} />
         </>
       )}
