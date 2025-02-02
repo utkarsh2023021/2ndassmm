@@ -105,9 +105,9 @@ app.post("/signup", async (req, res) => {
 
 // Get logged-in user's name
 app.get("/get-user-name", async (req, res) => {
-  console.log("Session data:", req.session);  // Debugging log
+  console.log("Session data before fetch:", req.session);  // Debugging log
   if (!req.session.userId) {
-    return res.status(401).json({ error: "User not authenticated" });
+    return res.status(401).json({ error: "User not authenticated cause of not present user id" });
   }
 
   const user = await User.findById(req.session.userId);
