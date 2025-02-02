@@ -20,7 +20,7 @@ app.use(cors({
 
 const io = socketio(server, {
   cors: {
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
+    origin: true,
     methods: ["GET", "POST"],
   },
 });
