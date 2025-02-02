@@ -12,7 +12,7 @@ const RoomList = () => {
   const [newRoomName, setNewRoomName] = useState("");
   const [userName, setUserName] = useState("");
   const [showRoomIdInput, setShowRoomIdInput] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(""); // State for error message
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,16 +21,18 @@ const RoomList = () => {
       .then((data) => setRooms(data))
       .catch((error) => console.error("Error fetching room list:", error));
 
-    fetch("http://localhost:5000/get-user-name", {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => setUserName(data.name))
-      .catch((error) => console.error("Error fetching user name:", error));
+    const storedEmail = localStorage.getItem("userEmail");
+    if (storedEmail) {
+      fetch(`http://localhost:5000/get-user-name/${storedEmail}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.name) {
+            setUserName(data.name);
+            localStorage.setItem("userName", data.name);
+          }
+        })
+        .catch((error) => console.error("Error fetching user name:", error));
+    }
 
     socket.on("room list", (updatedRooms) => {
       setRooms(updatedRooms);
@@ -42,9 +44,14 @@ const RoomList = () => {
   }, []);
 
   const handleJoinRoom = (roomIdInput, roomId) => {
+    if (!userName) {
+      setErrorMessage("User name not found. Please log in again.");
+      return;
+    }
+
     if (roomIdInput !== roomId) {
       setErrorMessage("Oops! Incorrect Room ID. Please try again.");
-      setTimeout(() => setErrorMessage(""), 3000); // Hide the error after 3 seconds
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
 
@@ -56,9 +63,7 @@ const RoomList = () => {
 
     fetch("http://localhost:5000/create-room", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roomId: newRoomId, roomName: newRoomName }),
     })
       .then((response) => response.json())
@@ -77,17 +82,13 @@ const RoomList = () => {
     <div className="room-list-container">
       <div className="room-list-box">
         <h1 className="room-list-title">Available Rooms</h1>
-
-        {/* Error message */}
         {errorMessage && <div className="error-notification">{errorMessage}</div>}
-
         <ul className="room-list">
           {rooms.map((room) => (
             <li key={room.roomId}>
               <div className="room-info">
                 Room Name: {room.roomName}, Users: {room.users}
               </div>
-
               {showRoomIdInput === room.roomId ? (
                 <div className="room-id-input-visible">
                   <input
@@ -112,7 +113,6 @@ const RoomList = () => {
             </li>
           ))}
         </ul>
-
         <div className="create-room">
           <h3>Create a New Room</h3>
           <input
