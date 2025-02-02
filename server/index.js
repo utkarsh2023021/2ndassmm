@@ -71,6 +71,7 @@ app.post("/login", async (req, res) => {
             console.error("Session save error:", err);
             return res.status(500).json({ error: "Session error" });
           }
+         }
         console.log("User ID set in session:", req.session.userId);  // Log for debugging
         res.json({ success: true });
       } else {
