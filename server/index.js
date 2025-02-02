@@ -61,26 +61,31 @@ app.use(express.static(path.join(__dirname, "client/build")));
 // Authentication endpoints
 app.post("/login", async (req, res) => {
     try {
-      const { email, password } = req.body;
-      const user = await User.findOne({ email });
-      if (user && password === user.password) {
-        req.session.userId = user._id;  // Store the user ID in the session
-        console.log("before saving user id:- "+user._id);
-         req.session.save(err => {  // ✅ Force session save
-          if (err) {
-            console.error("Session save error:", err);
-            return res.status(500).json({ error: "Session error" });
-          }
-         }
-        console.log("User ID set in session:", req.session.userId);  // Log for debugging
-        res.json({ success: true });
-      } else {
-        res.status(400).json({ error: "Invalid credentials" });
-      }
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+
+        if (user && password === user.password) {
+            req.session.userId = user._id;  
+            console.log("before saving user id:-", user._id);
+
+            req.session.save(err => {
+                if (err) {
+                    console.error("Session save error:", err);
+                    return res.status(500).json({ error: "Session error" });
+                }
+
+                console.log("User ID set in session:", req.session.userId);
+                res.json({ success: true });
+            });
+
+        } else {
+            res.status(400).json({ error: "Invalid credentials" });
+        }
     } catch (error) {
-      res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Server error" });
     }
-  });
+});
+
   
 
 app.post("/signup", async (req, res) => {
