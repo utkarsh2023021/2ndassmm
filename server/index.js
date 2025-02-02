@@ -88,23 +88,19 @@ app.post("/signup", async (req, res) => {
 
 // Get logged-in user's name
 app.get("/get-user-name", async (req, res) => {
-  try {
-    const userId = req.session.userId;  // Retrieve userId from session
-    console.log("this"+userId);
-    if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
-    }
+  console.log("Session data:", req.session);  // Debugging log
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "User not authenticated" });
+  }
 
-    const user = await User.findById(userId);
-    if (user) {
-      res.json({ name: user.name });
-    } else {
-      res.status(404).json({ error: "User not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching user name" });
+  const user = await User.findById(req.session.userId);
+  if (user) {
+    res.json({ name: user.name });
+  } else {
+    res.status(404).json({ error: "User not found" });
   }
 });
+
 
 // Room creation endpoint
 app.post("/create-room", async (req, res) => {
