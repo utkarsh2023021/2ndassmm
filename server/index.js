@@ -127,7 +127,7 @@ app.get("/messages/:roomId", async (req, res) => {
 io.on("connection", (socket) => {
     console.log("New user connected");
   
-    // Handle joining a room
+  
     socket.on("join room", async ({ roomId, name }) => {
       try {
         const room = await Room.findOne({ roomId });
@@ -136,36 +136,32 @@ io.on("connection", (socket) => {
           return;
         }
   
-        // Increment user count for the room
+       
         room.users++;
         await room.save();
   
-        // Join the room and set socket's roomId and name
+  
         socket.join(roomId);
         socket.roomId = roomId;
         socket.name = name;
   
-        // Get the last 100 messages from the room
+   
         const history = await Message.find({ roomId })
           .sort({ timestamp: 1 })
           .limit(100);
         socket.emit("chat history", history);
   
-        // Emit room joined event to the client
+     
         socket.emit("room joined");
   
-        // Fetch and emit updated user list in the room
         const usersInRoom = (await io.in(roomId).fetchSockets()).map(s => s.name || "Anonymous");
         io.to(roomId).emit("user list", usersInRoom);
   
-        // Notify others in the room that a new user has joined
         io.to(roomId).emit("user joined", { name, users: room.users });
       } catch (error) {
         console.error("Error joining room:", error);
       }
     });
-  
-    // Handle user leaving the room
     socket.on("leave room", async () => {
       try {
         const roomId = socket.roomId;
@@ -173,16 +169,16 @@ io.on("connection", (socket) => {
   
         const room = await Room.findOne({ roomId });
         if (room) {
-          // Decrease the user count when a user leaves
+       
           room.users = Math.max(0, room.users - 1);
           await room.save();
   
           socket.leave(roomId);
   
-          // Emit room updates after a user leaves
+       
           io.to(roomId).emit("user left", { name: socket.name, users: room.users });
   
-          // Emit updated room list to all clients
+   
           io.emit("room list", await Room.find());
         }
       } catch (error) {
@@ -190,21 +186,21 @@ io.on("connection", (socket) => {
       }
     });
   
-    // Handle user disconnect
+    
     socket.on("disconnect", async () => {
       const roomId = socket.roomId;
       if (roomId) {
         try {
           const room = await Room.findOne({ roomId });
           if (room) {
-            // Decrease the user count on disconnect
+         
             room.users = Math.max(0, room.users - 1);
             await room.save();
   
-            // Emit user left message to the room
+       
             io.to(roomId).emit("user left", { name: socket.name, users: room.users });
   
-            // Emit updated room list to all clients
+           
             io.emit("room list", await Room.find());
           }
         } catch (error) {
@@ -213,7 +209,7 @@ io.on("connection", (socket) => {
       }
     });
   
-    // Handle sending a chat message
+    
     socket.on("chat message", async ({ roomId, msg }) => {
       try {
         const name = socket.name || "Anonymous";
@@ -222,23 +218,23 @@ io.on("connection", (socket) => {
           return;
         }
   
-        // Create and save the new message in the database
+       
         const message = new Message({ roomId, name, msg });
         await message.save();
   
-        // Emit the new message to the room
+       
         io.to(roomId).emit("chat message", { name, msg, timestamp: message.timestamp });
       } catch (error) {
         console.error("Error saving message:", error);
       }
     });
   
-    // Handle user typing
+  
     socket.on("typing", (roomId, name) => {
       socket.to(roomId).emit("user typing", name);
     });
   
-    // Handle stop typing
+ 
     socket.on("stop typing", (roomId) => {
       socket.to(roomId).emit("user stopped typing");
     });
