@@ -1,6 +1,5 @@
-/* Login.css */
 
-/* Animate the background gradient */
+
 @keyframes gradientBackground {
     0% {
       background-position: 0% 50%;
@@ -13,7 +12,6 @@
     }
   }
   
-  /* Fade in animation for the login box */
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -40,16 +38,16 @@
 }
 
   
-  /* Glass effect on the login box */
+
   .login-box {
-    background: rgba(255, 255, 255, 0.2); /* semi-transparent white */
+    background: rgba(255, 255, 255, 0.2); 
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     width: 350px;
     text-align: center;
     padding: 30px;
     animation: fadeIn 0.8s ease-out;
-    backdrop-filter: blur(10px); /* blurs the background behind the box */
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
   
@@ -60,7 +58,7 @@
     position: relative;
   }
   
-  /* Adding a subtle underline effect on hover for the title */
+  
   .login-title::after {
     content: "";
     position: absolute;
@@ -95,7 +93,7 @@
     border-radius: 6px;
     font-size: 16px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    background-color: rgba(255, 255, 255, 0.8); /* semi-transparent input background */
+    background-color: rgba(255, 255, 255, 0.8); 
   }
   
   .login-input:focus {
