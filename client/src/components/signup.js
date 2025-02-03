@@ -28,7 +28,7 @@ const Signup = () => {
 
       const data = await response.json();
       if (response.ok) {
-        navigate("/login"); // Redirect to login page
+        navigate("/login");
       } else {
         setError(data.error || "An unknown error occurred.");
       }
