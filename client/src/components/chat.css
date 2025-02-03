@@ -1,4 +1,4 @@
-/* Chat.css */
+
 
 .chat {
     font-family: Arial, sans-serif;
@@ -222,7 +222,7 @@
     transform: scale(1.1);
   }
   
-  /* Animation for typing status */
+
   .typing-status {
     animation: typing 1s infinite;
   }
