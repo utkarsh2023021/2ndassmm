@@ -123,7 +123,7 @@ const Chat = () => {
 
     socketRef.current.emit("leave room");
     setJoined(false);
-    setUsers([]); // Clear the user list when leaving the room
+    setUsers([]);
   };
 
   return (
