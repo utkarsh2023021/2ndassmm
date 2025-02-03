@@ -188,7 +188,7 @@
     animation: slideIn 0.5s ease-in-out;
   }
   
-  /* Slide-in animation for the error notification */
+
   @keyframes slideIn {
     0% {
       transform: translateX(-50%) translateY(-30px);
