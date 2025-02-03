@@ -15,7 +15,7 @@ const App = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/rooms" element={<RoomList />} />
-        <Route path="/chat/:roomId" element={<Chat />} /> {/* Updated route */}
+        <Route path="/chat/:roomId" element={<Chat />} /> 
       </Routes>
     </Router>
   );
